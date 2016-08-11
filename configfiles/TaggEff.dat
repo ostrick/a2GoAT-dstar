@@ -6,16 +6,19 @@
 Decode-Doubles: 1
 
 # Set prompt and random windows (standard library and GH1 library)
-Set-Prompt-Cut: -6 6
-Add-Random-Cut: -500 -10
-Add-Random-Cut: 10 500
+Set-Prompt-Cut: -30 30
+Add-Random-Cut: -480 -40
+Add-Random-Cut: 40 620
 
 # where are the tagger scalers?
-Tagger-Scalers: 400 751
+#Tagger-Scalers: 400 751
 
 # where are the live time scalers?
 # first is clock, second is inhibited, third (optional) is tagger inhib
 Live-Time-Scalers: 191 190
+
+# Are these free running scalers?
+Free-Running-Scal: 1
 
 Display-Scalers: TaggerAccScal 2864 2895
 Display-Scalers: TaggerAccScal 2064 2095
