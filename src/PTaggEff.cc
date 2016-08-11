@@ -6,8 +6,6 @@ PTaggEff::PTaggEff()
     TaggerAllHits = new GH1("TaggerAllHits","Tagger - All Hits",352,0,352);
     TaggerSingles = new GH1("TaggerSingles","Tagger - Single Hits",352,0,352);
     TaggerDoubles = new GH1("TaggerDoubles","Tagger - Double Hits",352,0,352);
-    ScCorrSingles = new TH1D("ScCorrSingles","Scaler Correction for Singles",352,0,352);
-    ScCorrDoubles = new TH1D("ScCorrDoubles","Scaler Correction for Doubles",352,0,352);
     FreeScalers = true;
 }
 
@@ -104,25 +102,41 @@ void	PTaggEff::ProcessScalerRead()
 
 Bool_t	PTaggEff::Write()
 {    
-    Double_t overlap1, overlap2;
-    for (Int_t i = 0; i < GetSetupParameters()->GetNTagger(); i++)
-    {
-        if(i==0) overlap1 = 0;
-        else overlap1 = ((0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i)))+(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i-1)))-
-                         TMath::Abs((GetSetupParameters()->GetTaggerPhotonEnergy(i))-(GetSetupParameters()->GetTaggerPhotonEnergy(i-1))));
-        if(i==((GetSetupParameters()->GetNTagger())-1)) overlap2 = 0;
-        else overlap2 = ((0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i)))+(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i+1)))-
-                         TMath::Abs((GetSetupParameters()->GetTaggerPhotonEnergy(i))-(GetSetupParameters()->GetTaggerPhotonEnergy(i+1))));
-        ScCorrSingles->SetBinContent(i+1,1-((overlap1+overlap2)/(GetSetupParameters()->GetTaggerEnergyWidth(i))));
-        ScCorrDoubles->SetBinContent(i+1,1-(0.5*(overlap1+overlap2)/(GetSetupParameters()->GetTaggerEnergyWidth(i))));
-    }
-
     TH1D *ScalerAllHits = (TH1D*)TaggerAccScal->Clone("ScalerAllHits");
     TH1D *ScalerSingles = (TH1D*)TaggerAccScal->Clone("ScalerSingles");
     TH1D *ScalerDoubles = (TH1D*)TaggerAccScal->Clone("ScalerDoubles");
 
-    ScalerSingles->Multiply(ScCorrSingles);
-    ScalerDoubles->Multiply(ScCorrDoubles);
+    TH1D *ScalerOverlap = new TH1D("ScalerOverlap","Scalers in Overlaps",351,0,351);
+    TF1 brem("brem","1/x",0.1,1600);
+    Double_t over_int, chan_int;
+
+    for (Int_t i = 1; i < (GetSetupParameters()->GetNTagger()); i++)
+    {
+        if(((TaggerAccScal->GetBinContent(i))==0) || ((TaggerAccScal->GetBinContent(i+1))==0)) continue;
+
+        over_int = brem.Integral(((GetSetupParameters()->GetTaggerPhotonEnergy(i))-(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i)))),
+                                 ((GetSetupParameters()->GetTaggerPhotonEnergy(i+1))+(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i+1)))));
+
+        if((TaggerAccScal->GetBinContent(i)) < (TaggerAccScal->GetBinContent(i+1)))
+        {
+            chan_int = brem.Integral(((GetSetupParameters()->GetTaggerPhotonEnergy(i))-(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i)))),
+                                     ((GetSetupParameters()->GetTaggerPhotonEnergy(i))+(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i)))));
+            ScalerOverlap->SetBinContent(i,(TaggerAccScal->GetBinContent(i))*over_int/chan_int);
+        }
+        else
+        {
+            chan_int = brem.Integral(((GetSetupParameters()->GetTaggerPhotonEnergy(i+1))-(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i+1)))),
+                                     ((GetSetupParameters()->GetTaggerPhotonEnergy(i+1))+(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i+1)))));
+            ScalerOverlap->SetBinContent(i,(TaggerAccScal->GetBinContent(i+1))*over_int/chan_int);
+
+        }
+
+        ScalerSingles->SetBinContent(i,((ScalerSingles->GetBinContent(i))-(ScalerOverlap->GetBinContent(i))));
+        ScalerSingles->SetBinContent(i+1,((ScalerSingles->GetBinContent(i+1))-(ScalerOverlap->GetBinContent(i))));
+
+        ScalerDoubles->SetBinContent(i,((ScalerDoubles->GetBinContent(i))-0.5*(ScalerOverlap->GetBinContent(i))));
+        ScalerDoubles->SetBinContent(i+1,((ScalerDoubles->GetBinContent(i+1))-0.5*(ScalerOverlap->GetBinContent(i))));
+    }
 
     Double_t LiveTime = 1;
     if(FreeScalers) LiveTime = ((LiveTimeScal->GetBinContent(2))/(LiveTimeScal->GetBinContent(1)));
@@ -154,10 +168,12 @@ Bool_t	PTaggEff::Write()
     ScalerAllHits->Write();
     ScalerSingles->Write();
     ScalerDoubles->Write();
+    ScalerOverlap->Write();
 
     delete ScalerAllHits;
     delete ScalerSingles;
     delete ScalerDoubles;
+    delete ScalerOverlap;
 
     delete TempAllHits;
     delete TempSingles;

@@ -47,8 +47,7 @@ void TaggEffBgSub(TString sBeam, TString sBkg1, TString sBkg2="", Bool_t bFreeSc
   }
 
   TString sOut = sBeam;
-  if(sOut.Contains("GoAT")) sOut.ReplaceAll("GoAT","BkgSub");
-  else sOut.Prepend("BkgSub_");
+  sOut.ReplaceAll(".root","_BkgSub.root");
 
   TFile fOut(sOut,"RECREATE");
 

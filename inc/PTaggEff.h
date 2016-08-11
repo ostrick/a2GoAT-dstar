@@ -8,6 +8,7 @@
 
 #include "GTreeManager.h"
 #include "PPhysics.h"
+#include "TF1.h"
 
 class	PTaggEff  : public PPhysics
 {
@@ -16,8 +17,6 @@ private:
     GH1*	TaggerAllHits;
     GH1*	TaggerSingles;
     GH1*	TaggerDoubles;
-    TH1*    ScCorrSingles;
-    TH1*    ScCorrDoubles;
     TH1*	TaggerAccScal;
     TH1*	LiveTimeScal;
     Bool_t  FreeScalers;
