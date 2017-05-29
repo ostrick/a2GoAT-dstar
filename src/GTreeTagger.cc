@@ -20,6 +20,7 @@ GTreeTagger::GTreeTagger(GTreeManager *Manager)    :
         doubleEnergy[i]  = 0;
     }
     for(Int_t i=0; i<352; i++) calibration[i] = 0;
+    TaggerPairTimeDiff = new TH1D("TaggerPairTimeDiff","Absolute Time Difference between Tagger Pairs",100,0,20);
 }
 
 GTreeTagger::~GTreeTagger()
@@ -79,6 +80,7 @@ void    GTreeTagger::DecodeDoubles(const Double_t timingRes, const Bool_t decode
 
             // Check if neighboring channel is within timing resolution
             timeDiff = (TMath::Abs(taggedTime[taggedOrder[j]]-taggedTime[taggedOrder[i]]));
+            TaggerPairTimeDiff->Fill(timeDiff);
             if(timeDiff < timingRes)
             {
                 pairInd1[nPairs] = taggedOrder[i];

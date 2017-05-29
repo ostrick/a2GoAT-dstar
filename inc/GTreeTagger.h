@@ -27,6 +27,7 @@ private:
     Double_t        doubleEnergy[GTreeTagger_MAX];
     Bool_t          hasEnergy;
     Double_t        calibration[352];
+    TH1*            TaggerPairTimeDiff;
 
 protected:
     virtual void    SetBranchAdresses();
