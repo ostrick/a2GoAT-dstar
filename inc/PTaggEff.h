@@ -9,6 +9,7 @@
 #include "GTreeManager.h"
 #include "PPhysics.h"
 #include "TF1.h"
+#include "TGraph.h"
 
 class	PTaggEff  : public PPhysics
 {
@@ -20,6 +21,8 @@ private:
     TH1*	TaggerAccScal;
     TH1*	LiveTimeScal;
     Bool_t  FreeScalers;
+    Bool_t  HasAttenuation;
+    TGraph* Attenuation;
 
 protected:
     virtual Bool_t  Start();
@@ -32,6 +35,8 @@ public:
     virtual ~PTaggEff();
     virtual Bool_t  Init();
     Bool_t InitFreeScalers();
+    Bool_t InitAttenuation();
+    TGraph GetAttenuation(TString, Double_t, Double_t);
 
 };
 #endif

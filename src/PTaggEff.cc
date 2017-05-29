@@ -7,6 +7,7 @@ PTaggEff::PTaggEff()
     TaggerSingles = new GH1("TaggerSingles","Tagger - Single Hits",352,0,352);
     TaggerDoubles = new GH1("TaggerDoubles","Tagger - Double Hits",352,0,352);
     FreeScalers = true;
+    HasAttenuation = false;
 }
 
 PTaggEff::~PTaggEff()
@@ -20,6 +21,7 @@ Bool_t	PTaggEff::Init()
 
     if(!InitBackgroundCuts()) return kFALSE;
     if(!InitFreeScalers()) return kFALSE;
+    if(!InitAttenuation()) return kFALSE;
 
     if(!PPhysics::Init()) return kFALSE;
 
@@ -78,14 +80,19 @@ void	PTaggEff::ProcessEvent()
 
 Bool_t 	PTaggEff::InitFreeScalers()
 {
-    Int_t sc1;
+    Int_t fs;
     string config = ReadConfig("Free-Running-Scal");
-    if(sscanf( config.c_str(), "%d\n", &sc1) == 1)
+    if(strcmp(config.c_str(), "nokey") == 0)
     {
-        cout << "Setting free running scalers: " << sc1 << endl << endl;
-        FreeScalers = (Bool_t)sc1;
+        cout << "Assuming scalers are free running! " << endl << endl;
+        FreeScalers = true;
     }
-    else if(strcmp(config.c_str(), "nokey") != 0)
+    else if(sscanf( config.c_str(), "%d\n", &fs) == 1)
+    {
+        cout << "Setting free running scalers: " << fs << endl << endl;
+        FreeScalers = (Bool_t)fs;
+    }
+    else
     {
         cout << "Free running scalers not set correctly" << endl << endl;
         return kFALSE;
@@ -93,6 +100,92 @@ Bool_t 	PTaggEff::InitFreeScalers()
 
     return kTRUE;
 
+}
+
+Bool_t  PTaggEff::InitAttenuation()
+{
+    char name[256];
+    Double_t density = 0;
+    Double_t length = 0;
+    string config = ReadConfig("Beam-Attenuation");
+    if(strcmp(config.c_str(), "nokey") == 0)
+    {
+        cout << "Assuming no beam attenuation! " << endl << endl;
+        HasAttenuation = false;
+    }
+    else if(sscanf( config.c_str(), "%s %lf %lf\n", name, &length, &density) >= 1)
+    {
+        cout << "Setting beam attenuation: " << name << ", " << length << " cm, " << density << " g/cm^3" << endl << endl;
+        HasAttenuation = true;
+
+        TString target = name;
+        std::vector<TGraph> attenuators;
+        attenuators.push_back(GetAttenuation("Air",0.001225,900));
+
+        if(target.EqualTo("lh2",TString::kIgnoreCase))
+        {
+            if(length==0) length=10;
+            attenuators.push_back(GetAttenuation("Kapton",0.0125,1.42));
+            attenuators.push_back(GetAttenuation("Hydrogen",length,0.071));
+        }
+        else if(target.EqualTo("fst",TString::kIgnoreCase))
+        {
+            attenuators.push_back(GetAttenuation("Aluminum",0.002,2.7));
+            attenuators.push_back(GetAttenuation("Titanium",0.004,4.506));
+            attenuators.push_back(GetAttenuation("Helium",1,0.145));
+            attenuators.push_back(GetAttenuation("Butanol",1.2,0.94));
+        }
+        else if(!target.EqualTo("Air",TString::kIgnoreCase))
+        {
+            attenuators.push_back(GetAttenuation(target,length,density));
+        }
+
+        Attenuation = new TGraph(attenuators[0].GetN());
+        Double_t enr1, enr2, att1, att2;
+
+        printf("\nMaterial\t100\t300\t500\t700\t900\t1100\t1300\t1500\n\n");
+        for(UInt_t i=0; i<(attenuators.size()); i++)
+        {
+            printf("%-10s\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n",attenuators[i].GetTitle(),attenuators[i].Eval(100),attenuators[i].Eval(300),attenuators[i].Eval(500),attenuators[i].Eval(700),attenuators[i].Eval(900),attenuators[i].Eval(1100),attenuators[i].Eval(1300),attenuators[i].Eval(1500));
+            for(Int_t j=0; j<(attenuators[i].GetN()); j++)
+            {
+                Attenuation->GetPoint(j,enr1,att1);
+                attenuators[i].GetPoint(j,enr2,att2);
+                if(i==0) Attenuation->SetPoint(j,enr2,att2);
+                else if(enr1==enr2) Attenuation->SetPoint(j,enr2,att1*att2);
+                else
+                {
+                    printf("\n\nEnergy values in files do not match!\n");
+                    return kFALSE;
+                }
+            }
+        }
+        printf("\n%-10s\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\t%.4f\n\n","Total",Attenuation->Eval(100),Attenuation->Eval(300),Attenuation->Eval(500),Attenuation->Eval(700),Attenuation->Eval(900),Attenuation->Eval(1100),Attenuation->Eval(1300),Attenuation->Eval(1500));
+    }
+    else
+    {
+        cout << "Beam attenuation not set correctly" << endl << endl;
+        return kFALSE;
+    }
+
+    return kTRUE;
+
+}
+
+TGraph  PTaggEff::GetAttenuation(TString target, Double_t length, Double_t density)
+{
+    TTree tAtt("tAtt","Beam Attenuation");
+    tAtt.ReadFile("configfiles/attenuation/"+target+".txt","E:A");
+    Int_t nPnts = tAtt.Draw(Form("E:TMath::Exp(-A*%.6f*%.6f)>>attTemp",length,density),"","goff");
+    Double_t *enr = tAtt.GetV1();
+    Double_t *att = tAtt.GetV2();
+    TGraph gAtt(nPnts,enr,att);
+    gAtt.SetTitle(target);
+    gAtt.SetLineWidth(2);
+    //TH1F *attTemp = (TH1F*)gDirectory->Get("attTemp");
+    //delete attTemp;
+    gDirectory->Delete("attTemp");
+    return gAtt;
 }
 
 void	PTaggEff::ProcessScalerRead()
@@ -110,23 +203,32 @@ Bool_t	PTaggEff::Write()
     TF1 brem("brem","1/x",0.1,1600);
     Double_t over_int, chan_int;
 
-    for (Int_t i = 1; i < (GetSetupParameters()->GetNTagger()); i++)
+    TH1D *BmAttenuation = new TH1D("BmAttenuation","Beam Attenuation",352,0,352);
+
+    for (Int_t i = 0; i < (GetSetupParameters()->GetNTagger()); i++)
     {
+        if(HasAttenuation)
+        {
+            BmAttenuation->SetBinContent(i+1,Attenuation->Eval(GetSetupParameters()->GetTaggerPhotonEnergy(i+1)));
+            BmAttenuation->SetBinError(i+1,0.0001);
+        }
+        if(i==0) continue;
+
         if(((TaggerAccScal->GetBinContent(i))==0) || ((TaggerAccScal->GetBinContent(i+1))==0)) continue;
 
-        over_int = brem.Integral(((GetSetupParameters()->GetTaggerPhotonEnergy(i))-(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i)))),
-                                 ((GetSetupParameters()->GetTaggerPhotonEnergy(i+1))+(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i+1)))));
+        over_int = brem.Integral(((GetSetupParameters()->GetTaggerPhotonEnergy(i-1))-(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i-1)))),
+                                 ((GetSetupParameters()->GetTaggerPhotonEnergy(i))+(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i)))));
 
         if((TaggerAccScal->GetBinContent(i)) < (TaggerAccScal->GetBinContent(i+1)))
         {
-            chan_int = brem.Integral(((GetSetupParameters()->GetTaggerPhotonEnergy(i))-(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i)))),
-                                     ((GetSetupParameters()->GetTaggerPhotonEnergy(i))+(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i)))));
+            chan_int = brem.Integral(((GetSetupParameters()->GetTaggerPhotonEnergy(i-1))-(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i-1)))),
+                                     ((GetSetupParameters()->GetTaggerPhotonEnergy(i-1))+(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i-1)))));
             ScalerOverlap->SetBinContent(i,(TaggerAccScal->GetBinContent(i))*over_int/chan_int);
         }
         else
         {
-            chan_int = brem.Integral(((GetSetupParameters()->GetTaggerPhotonEnergy(i+1))-(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i+1)))),
-                                     ((GetSetupParameters()->GetTaggerPhotonEnergy(i+1))+(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i+1)))));
+            chan_int = brem.Integral(((GetSetupParameters()->GetTaggerPhotonEnergy(i))-(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i)))),
+                                     ((GetSetupParameters()->GetTaggerPhotonEnergy(i))+(0.5*(GetSetupParameters()->GetTaggerEnergyWidth(i)))));
             ScalerOverlap->SetBinContent(i,(TaggerAccScal->GetBinContent(i+1))*over_int/chan_int);
 
         }
@@ -160,6 +262,15 @@ Bool_t	PTaggEff::Write()
 
     TaggEffDoubles->Sumw2();
     TaggEffDoubles->Divide(TempDoubles,ScalerDoubles,1,LiveTime);
+
+    if(HasAttenuation)
+    {
+        TaggEffAllHits->Divide(BmAttenuation);
+        TaggEffSingles->Divide(BmAttenuation);
+        TaggEffDoubles->Divide(BmAttenuation);
+        BmAttenuation->Write();
+        delete BmAttenuation;
+    }
 
     TaggEffAllHits->Write();
     TaggEffSingles->Write();

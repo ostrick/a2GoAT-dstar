@@ -20,6 +20,13 @@ Live-Time-Scalers: 191 190
 # Are these free running scalers?
 Free-Running-Scal: 1
 
+# Account for beam attenuation in air and target?
+# First is target name, second is length (cm), third is density (g/cm^3)
+# 'LH2' automatically adds kapton window, and 10 cm (or given) length of LH2
+# 'FST' automatically builds frozen spin target with 2 cm butanol
+# Other targets (Carbon, Aluminum, Lead) require length and density
+#Beam-Attenuation: FST
+
 Display-Scalers: TaggerAccScal 2864 2895
 Display-Scalers: TaggerAccScal 2064 2095
 Display-Scalers: TaggerAccScal 2576 2607
