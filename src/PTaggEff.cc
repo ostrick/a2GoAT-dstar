@@ -1,11 +1,11 @@
 #include "PTaggEff.h"
 
 PTaggEff::PTaggEff()
-{ 
-    TaggerTime = new TH2D("TaggerTime","Tagger - Time",1400,-700,700,352,0,352);
-    TaggerAllHits = new GH1("TaggerAllHits","Tagger - All Hits",352,0,352);
-    TaggerSingles = new GH1("TaggerSingles","Tagger - Single Hits",352,0,352);
-    TaggerDoubles = new GH1("TaggerDoubles","Tagger - Double Hits",352,0,352);
+{
+    TaggerTime = new TH2D("TaggerTime","Tagger - Time",1400,-700,700,nTaggerChannels,0,nTaggerChannels);
+    TaggerAllHits = new GH1("TaggerAllHits","Tagger - All Hits",nTaggerChannels,0,nTaggerChannels);
+    TaggerSingles = new GH1("TaggerSingles","Tagger - Single Hits",nTaggerChannels,0,nTaggerChannels);
+    TaggerDoubles = new GH1("TaggerDoubles","Tagger - Double Hits",nTaggerChannels,0,nTaggerChannels);
     FreeScalers = true;
     HasAttenuation = false;
 }
@@ -53,8 +53,9 @@ Bool_t	PTaggEff::Start()
 
     TraverseValidEvents();
 
-    GoosyTagger(TaggerAccScal);
+    //GoosyTagger(TaggerAccScal);
     //GoosyVuprom(TaggerAccScal);
+    GoosyNewFPD(TaggerAccScal);
 
     return kTRUE;
 }
@@ -203,7 +204,7 @@ Bool_t	PTaggEff::Write()
     TF1 brem("brem","1/x",0.1,1600);
     Double_t over_int, chan_int;
 
-    TH1D *BmAttenuation = new TH1D("BmAttenuation","Beam Attenuation",352,0,352);
+    TH1D *BmAttenuation = new TH1D("BmAttenuation","Beam Attenuation",nTaggerChannels,0,nTaggerChannels);
 
     for (Int_t i = 0; i < (GetSetupParameters()->GetNTagger()); i++)
     {
@@ -250,9 +251,9 @@ Bool_t	PTaggEff::Write()
     TH1D *TempSingles = (TH1D*)TaggerSingles->GetSum()->GetResult()->GetBuffer()->Clone("TempSingles");
     TH1D *TempDoubles = (TH1D*)TaggerDoubles->GetSum()->GetResult()->GetBuffer()->Clone("TempDoubles");
 
-    TH1D *TaggEffAllHits = new TH1D("TaggEffAllHits","Tagging Efficiency - All Hits",352,0,352);
-    TH1D *TaggEffSingles = new TH1D("TaggEffSingles","Tagging Efficiency - Single Hits",352,0,352);
-    TH1D *TaggEffDoubles = new TH1D("TaggEffDoubles","Tagging Efficiency - Double Hits",352,0,352);
+    TH1D *TaggEffAllHits = new TH1D("TaggEffAllHits","Tagging Efficiency - All Hits",nTaggerChannels,0,nTaggerChannels);
+    TH1D *TaggEffSingles = new TH1D("TaggEffSingles","Tagging Efficiency - Single Hits",nTaggerChannels,0,nTaggerChannels);
+    TH1D *TaggEffDoubles = new TH1D("TaggEffDoubles","Tagging Efficiency - Double Hits",nTaggerChannels,0,nTaggerChannels);
 
     TaggEffAllHits->Sumw2();
     TaggEffAllHits->Divide(TempAllHits,ScalerAllHits,1,LiveTime);

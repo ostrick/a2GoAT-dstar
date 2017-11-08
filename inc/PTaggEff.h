@@ -14,6 +14,8 @@
 class	PTaggEff  : public PPhysics
 {
 private:
+    Int_t nTaggerChannels = 80;
+
     TH1*	TaggerTime;
     GH1*	TaggerAllHits;
     GH1*	TaggerSingles;

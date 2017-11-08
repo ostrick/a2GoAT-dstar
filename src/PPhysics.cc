@@ -163,6 +163,24 @@ void PPhysics::GoosyVuprom(TH1* hist)
     delete temp;
 }
 
+void PPhysics::GoosyNewFPD(TH1* hist)
+{
+    Int_t nBins = hist->GetNbinsX();
+
+    TH1* temp = (TH1D*) hist->Clone("temp");
+
+    Int_t bin;
+    Int_t order[8] = {7,4,6,5,3,0,2,1};
+
+    for (Int_t i = 0; i < nBins; i++)
+    {
+        bin = 8*(i/8)+order[i%8]+1;
+
+        hist->SetBinContent(i+1,temp->GetBinContent(bin));
+    }
+    delete temp;
+}
+
 void PPhysics::FillMissingMass(const GTreeParticle& tree, TH1* Hprompt, TH1* Hrandom)
 {
     for (Int_t i = 0; i < tree.GetNParticles(); i++)

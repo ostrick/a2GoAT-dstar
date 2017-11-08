@@ -126,6 +126,7 @@ public:
     void FillScalers(Int_t low_scaler_number, Int_t high_scaler_number, TH1* hist, Int_t first_bin=1);
     void GoosyTagger(TH1* hist);
     void GoosyVuprom(TH1* hist);
+    void GoosyNewFPD(TH1* hist);
 
     TH1D* GetScalerHist(Int_t index) {return (TH1D*)scalerHists->At(index);}
     TH1D* GetScalerHist(const char* name) {return (TH1D*)scalerHists->At(scalerHists->IndexOf(scalerHists->FindObject(name)));}
