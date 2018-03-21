@@ -72,6 +72,7 @@ void PPhysics::FillScalers(Int_t low_scaler_number, Int_t high_scaler_number, TH
 
 	// Add to accumulated
 	hist->Add(hist_current_SR);
+    delete hist_current_SR;
 }
 
 void PPhysics::AddScalerHist(const char* name, Int_t lo, Int_t hi)
