@@ -2,10 +2,6 @@
 
 PTaggEff::PTaggEff()
 {
-    TaggerTime = new TH2D("TaggerTime","Tagger - Time",1400,-700,700,nTaggerChannels,0,nTaggerChannels);
-    TaggerAllHits = new GH1("TaggerAllHits","Tagger - All Hits",nTaggerChannels,0,nTaggerChannels);
-    TaggerSingles = new GH1("TaggerSingles","Tagger - Single Hits",nTaggerChannels,0,nTaggerChannels);
-    TaggerDoubles = new GH1("TaggerDoubles","Tagger - Double Hits",nTaggerChannels,0,nTaggerChannels);
     FreeScalers = true;
     HasAttenuation = false;
 }
@@ -55,13 +51,28 @@ Bool_t	PTaggEff::Start()
 
     //GoosyTagger(TaggerAccScal);
     //GoosyVuprom(TaggerAccScal);
-    GoosyNewFPD(TaggerAccScal);
+    //GoosyNewFPD(TaggerAccScal);
+    GoosyNewFPDRecabled(TaggerAccScal);
 
     return kTRUE;
 }
 
 void	PTaggEff::ProcessEvent()
 {
+    if(nTaggerChannels == 0)
+    {
+        nTaggerChannels = GetSetupParameters()->GetNTagger();
+        TaggerTime = new TH2D("TaggerTime","Tagger - Time",1400,-700,700,nTaggerChannels,0,nTaggerChannels);
+        TaggerPreHits = new TH1D("TaggerPreHits","Tagger - Previous Hits",nTaggerChannels,0,nTaggerChannels);
+        TaggerCurHits = new TH1D("TaggerCurHits","Tagger - Current Hits",nTaggerChannels,0,nTaggerChannels);
+        TaggerAllHits = new GH1("TaggerAllHits","Tagger - All Hits",nTaggerChannels,0,nTaggerChannels);
+        TaggerSingles = new GH1("TaggerSingles","Tagger - Single Hits",nTaggerChannels,0,nTaggerChannels);
+        TaggerDoubles = new GH1("TaggerDoubles","Tagger - Double Hits",nTaggerChannels,0,nTaggerChannels);
+        TaggerHits = new TH2D("TaggerHits","Tagger Hits",GetScalers()->GetNEntries(),0,GetScalers()->GetNEntries(),nTaggerChannels,0,nTaggerChannels);
+        TaggerScalers = new TH2D("TaggerScalers","Tagger Scalers",GetScalers()->GetNEntries(),0,GetScalers()->GetNEntries(),nTaggerChannels,0,nTaggerChannels);
+        TaggerHitScal = new TH2D("TaggerHitScal","Tagger Hits/Scalers",GetScalers()->GetNEntries(),0,GetScalers()->GetNEntries(),nTaggerChannels,0,nTaggerChannels);
+    }
+
     if(GetDecodeDoubles()) GetTagger()->DecodeDoubles();
 
     for (Int_t i = 0; i < GetTagger()->GetNTagged(); i++)
@@ -191,7 +202,28 @@ TGraph  PTaggEff::GetAttenuation(TString target, Double_t length, Double_t densi
 
 void	PTaggEff::ProcessScalerRead()
 {
+    TaggerTime->ProjectionY("TaggerCurHits");
+    TaggerCurHits->Add(TaggerPreHits,-1);
+
+    TH1D *TaggerPreScal = (TH1D*)TaggerAccScal->Clone("TaggerPreScal");
     PPhysics::ProcessScalerRead();
+    scalerRead++;
+    TH1D *TaggerCurScal = (TH1D*)TaggerAccScal->Clone("TaggerCurScal");
+    TaggerCurScal->Add(TaggerPreScal,-1);
+
+    GoosyNewFPDRecabled(TaggerCurScal);
+
+    for (Int_t i = 1; i<=nTaggerChannels; i++)
+    {
+        TaggerHits->SetBinContent(scalerRead,i,TaggerCurHits->GetBinContent(i));
+        TaggerScalers->SetBinContent(scalerRead,i,TaggerCurScal->GetBinContent(i));
+        TaggerHitScal->SetBinContent(scalerRead,i,(TaggerCurHits->GetBinContent(i)/TaggerCurScal->GetBinContent(i)));
+    }
+
+    TaggerTime->ProjectionY("TaggerPreHits");
+
+    delete TaggerPreScal;
+    delete TaggerCurScal;
 }
 
 Bool_t	PTaggEff::Write()
@@ -246,6 +278,11 @@ Bool_t	PTaggEff::Write()
 
     // Write all GH1's and TObjects defined in this class
     if(!(GTreeManager::Write())) return false;
+
+    TaggerHits->Write();
+    TaggerScalers->Write();
+    TaggerHitScal->Write();
+    TaggerTime->Write();
 
     TH1D *TempAllHits = (TH1D*)TaggerAllHits->GetSum()->GetResult()->GetBuffer()->Clone("TempAllHits");
     TH1D *TempSingles = (TH1D*)TaggerSingles->GetSum()->GetResult()->GetBuffer()->Clone("TempSingles");

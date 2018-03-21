@@ -127,6 +127,7 @@ public:
     void GoosyTagger(TH1* hist);
     void GoosyVuprom(TH1* hist);
     void GoosyNewFPD(TH1* hist);
+    void GoosyNewFPDRecabled(TH1* hist);
 
     TH1D* GetScalerHist(Int_t index) {return (TH1D*)scalerHists->At(index);}
     TH1D* GetScalerHist(const char* name) {return (TH1D*)scalerHists->At(scalerHists->IndexOf(scalerHists->FindObject(name)));}

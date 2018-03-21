@@ -14,13 +14,19 @@
 class	PTaggEff  : public PPhysics
 {
 private:
-    Int_t nTaggerChannels = 80;
+    Int_t nTaggerChannels = 0;
+    Int_t scalerRead = 0;
 
-    TH1*	TaggerTime;
+    TH2*	TaggerTime;
+    TH1*	TaggerPreHits;
+    TH1*	TaggerCurHits;
     GH1*	TaggerAllHits;
     GH1*	TaggerSingles;
     GH1*	TaggerDoubles;
     TH1*	TaggerAccScal;
+    TH2*	TaggerHits;
+    TH2*	TaggerScalers;
+    TH2*	TaggerHitScal;
     TH1*	LiveTimeScal;
     Bool_t  FreeScalers;
     Bool_t  HasAttenuation;
