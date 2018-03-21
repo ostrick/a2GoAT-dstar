@@ -6,7 +6,7 @@
 Decode-Doubles: 1
 
 # Set prompt and random windows (standard library and GH1 library)
-Set-Prompt-Cut: -20 20
+Set-Prompt-Cut: -15 10
 Add-Random-Cut: -300 -30
 Add-Random-Cut: 30 650
 
@@ -19,6 +19,9 @@ Live-Time-Scalers: 191 190
 
 # Are these free running scalers?
 Free-Running-Scal: 1
+
+# Background scalers?
+Background-Scalers: 500 1 328
 
 # Account for beam attenuation in air and target?
 # First is target name, second is length (cm), third is density (g/cm^3)

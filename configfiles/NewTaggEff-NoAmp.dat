@@ -6,9 +6,10 @@
 Decode-Doubles: 1
 
 # Set prompt and random windows (standard library and GH1 library)
-Set-Prompt-Cut: -20 20
-Add-Random-Cut: -300 -30
-Add-Random-Cut: 30 650
+Set-Prompt-Cut: 0 40
+Add-Random-Cut: -900 -800
+#Add-Random-Cut: -300 -10
+#Add-Random-Cut: 50 650
 
 # where are the tagger scalers?
 #Tagger-Scalers: 400 751
