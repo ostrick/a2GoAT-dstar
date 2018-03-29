@@ -7,6 +7,7 @@ GTreeScaler::GTreeScaler(GTreeManager *Manager)    :
     GTree(Manager, TString("scalers"), kTRUE),
     eventNumber(0),
     eventID(0),
+    nmr(0),
     nScalers(0)
 {
     for(Int_t i=0; i<GTreeScaler_MAX; i++)
@@ -22,6 +23,7 @@ void    GTreeScaler::SetBranchAdresses()
 {
     if(inputTree->GetBranch("eventNumber")) inputTree->SetBranchAddress("eventNumber", &eventNumber);
     if(inputTree->GetBranch("eventID")) inputTree->SetBranchAddress("eventID", &eventID);
+    if(inputTree->GetBranch("nmr")) inputTree->SetBranchAddress("nmr", &nmr);
     if(inputTree->GetBranch("scalers")) nScalers = inputTree->GetLeaf("scalers")->GetLen();
     if(nScalers<=GTreeScaler_MAX && nScalers>0)
         inputTree->SetBranchAddress("scalers", scalers);
