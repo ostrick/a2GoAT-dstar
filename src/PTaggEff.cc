@@ -2,6 +2,8 @@
 
 PTaggEff::PTaggEff()
 {
+    nTaggerChannels = 0;
+    scalerRead = 0;
     FreeScalers = true;
     HasAttenuation = false;
 }
