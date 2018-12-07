@@ -22,6 +22,7 @@ GTreeManager::GTreeManager()    :
     tracks(0),
     tagger(0),
     linpol(0),
+    pairspec(0),
     trigger(0),
     scalers(0),
     setupParameters(0),
@@ -64,6 +65,7 @@ GTreeManager::GTreeManager()    :
     trigger = new GTreeTrigger(this);
     scalers = new GTreeScaler(this);
     linpol = new GTreeLinPol(this);
+    pairspec = new GTreePairSpec(this);
 #ifdef hasPluto
     pluto = new GTreePluto(this);
 #endif
