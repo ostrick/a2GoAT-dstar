@@ -6,6 +6,7 @@ PTaggEff::PTaggEff()
     scalerRead = 0;
     FreeScalers = true;
     HasAttenuation = false;
+    isPreRecabling = false;
 }
 
 PTaggEff::~PTaggEff()
@@ -47,14 +48,29 @@ Bool_t	PTaggEff::Start()
         cout << "ERROR: Input File is not an Acqu file." << endl;
         return kFALSE;
     }
+    // Extract run number
+    std::string inputFileName = GetInputFile(0);
+    
+    int beginIdx = inputFileName.rfind('_');
+    std::string runNumber = inputFileName.substr(beginIdx + 1, 5);
+
+    if(std::stoi(runNumber) < 21850)
+      isPreRecabling = true;
+    
     SetAsGoATFile();
 
     TraverseValidEvents();
 
-    //GoosyTagger(TaggerAccScal);
-    //GoosyVuprom(TaggerAccScal);
-    //GoosyNewFPD(TaggerAccScal);
-    GoosyNewFPDRecabled(TaggerAccScal);
+    if(isPreRecabling)
+    {
+      GoosyNewFPD(TaggerAccScal);
+      cout << endl << endl << "====== New FPD pre recabling! ======"<< endl << endl;
+    }
+  if(!isPreRecabling)
+    {
+      GoosyNewFPDRecabled(TaggerAccScal);
+      cout << endl << endl << "====== New FPD recabled! ======"<< endl << endl;
+    }
 
     return kTRUE;
 }
@@ -216,7 +232,10 @@ void	PTaggEff::ProcessScalerRead()
     TH1D *TaggerCurScal = (TH1D*)TaggerAccScal->Clone("TaggerCurScal");
     TaggerCurScal->Add(TaggerPreScal,-1);
 
-    GoosyNewFPDRecabled(TaggerCurScal);
+    if(isPreRecabling)
+      GoosyNewFPD(TaggerCurScal);
+    if(!isPreRecabling)
+      GoosyNewFPDRecabled(TaggerCurScal);
 
     // Get Pair Spect array
     const Double_t* scalerOpen = GetPairspec() -> GetScalerOpen();
