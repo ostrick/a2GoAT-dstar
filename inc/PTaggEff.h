@@ -35,7 +35,6 @@ private:
     TH2*        PairSpecGated;
     TH2*        PairSpecGatedDly;
     TH1*	LiveTimeScal;
-    Bool_t  isPreRecabling;
     Bool_t  FreeScalers;
     Bool_t  HasAttenuation;
     TGraph* Attenuation;
