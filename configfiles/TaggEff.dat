@@ -5,6 +5,11 @@
 # Decode double hits in tagger?
 Decode-Doubles: 1
 
+# Overwrite existing tagger energy calibration with the following file
+# Note file must simply be two columns with photon energy center and width
+#Tagger-Calibration: configfiles/FPD-Feb2018-883p20MeV-1p05504T.dat
+Tagger-Calibration: configfiles/tmp.dat
+
 # Set prompt and random windows (standard library and GH1 library)
 Set-Prompt-Cut: -30 30
 Add-Random-Cut: -480 -40

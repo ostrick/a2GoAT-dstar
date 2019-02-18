@@ -21,6 +21,7 @@ PPhysics::~PPhysics()
 Bool_t	PPhysics::Init()
 {
     if(!InitDecodeDoubles()) return kFALSE;
+    if(!InitTaggerCalibration()) return kFALSE;
     if(!InitTaggerChannelCuts()) return kFALSE;
     if(!InitTaggerScalers()) return kFALSE;
     if(!InitLiveTimeScalers()) return kFALSE;
@@ -567,6 +568,32 @@ Bool_t 	PPhysics::InitTargetMass()
 
 }
 
+Bool_t 	PPhysics::InitTaggerCalibration()
+{
+    char name[256];
+    string config = ReadConfig("Tagger-Calibration");
+    if(strcmp(config.c_str(), "nokey") != 0)
+    {
+        if(sscanf( config.c_str(), "%s\n", name) == 1)
+        {
+            TTree taggCal("taggCal","taggCal");
+            Int_t nChan = taggCal.ReadFile(name,"Energy:Width");
+            taggCal.Draw("Energy","","goff");
+            GetTagger()->SetCalibration(nChan,taggCal.GetV1());
+            cout << "Setting tagger calibration to values in " << name << endl;
+            cout << "\tChannel 0\t" << taggCal.GetV1()[0] << endl;
+            cout << "\tChannel " << nChan-1 << "\t" << taggCal.GetV1()[nChan-1] << endl << endl;
+        }
+        else
+        {
+            cout << "Tagger calibration not set correctly" << endl;
+            return kFALSE;
+        }
+    }
+
+    return kTRUE;
+}
+
 Bool_t 	PPhysics::InitTaggerChannelCuts()
 {
 	Double_t tc1, tc2;
@@ -676,8 +703,6 @@ Bool_t  PPhysics::InitDisplayScalers()
 
     return kTRUE;
 }
-
-
 
 Bool_t 	PPhysics::InitDecodeDoubles()
 {

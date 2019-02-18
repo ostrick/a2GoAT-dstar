@@ -253,7 +253,7 @@ Bool_t  GTreeManager::TraverseValidEvents_AcquTreeFile()
     {
         ((GTree*)readSingleReadList[l])->GetEntryFast(0);
         ((GTree*)readSingleReadList[l])->Fill();
-        if(!tagger->HasEnergy()) tagger->SetCalibration(setupParameters->GetNTagger(),setupParameters->GetTaggerPhotonEnergy());
+        if(!tagger->HasEnergy() && !tagger->HasCalibration()) tagger->SetCalibration(setupParameters->GetNTagger(),setupParameters->GetTaggerPhotonEnergy());
         if((tracks->GetTargetShift() != 0) && (tracks->GetTAPSDistance() == 0))
         {
             if(setupParameters->GetBaF2Distance() == 0)
@@ -354,7 +354,7 @@ Bool_t  GTreeManager::TraverseValidEvents_GoATTreeFile()
     for(Int_t l=0; l<readSingleReadList.GetEntriesFast(); l++)
     {
         ((GTree*)readSingleReadList[l])->GetEntryFast(0);
-        if(!tagger->HasEnergy()) tagger->SetCalibration(setupParameters->GetNTagger(),setupParameters->GetTaggerPhotonEnergy());
+        if(!tagger->HasEnergy() && !tagger->HasCalibration()) tagger->SetCalibration(setupParameters->GetNTagger(),setupParameters->GetTaggerPhotonEnergy());
     }
 
     if(!scalers->IsOpenForInput())

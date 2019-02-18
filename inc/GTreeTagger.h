@@ -26,6 +26,7 @@ private:
     Double_t        doubleTime[GTreeTagger_MAX];
     Double_t        doubleEnergy[GTreeTagger_MAX];
     Bool_t          hasEnergy;
+    Bool_t          hasCalibration;
     Double_t        calibration[352];
     TH1*            TaggerPairTimeDiff;
 
@@ -45,7 +46,7 @@ public:
     const	Double_t*       GetTaggedTime()                     const	{return taggedTime;}
             Double_t        GetTaggedTime(const Int_t index)    const	{return taggedTime[index];}
     const	Double_t*       GetTaggedEnergy()                   const	{return taggedEnergy;}
-            Double_t        GetTaggedEnergy(const Int_t index)	const	{if(hasEnergy) return taggedEnergy[index]; return calibration[taggedChannel[index]];}
+            Double_t        GetTaggedEnergy(const Int_t index)	const	{if(hasEnergy && !hasCalibration) return taggedEnergy[index]; return calibration[taggedChannel[index]];}
     const	Bool_t*         GetTaggedDouble()                   const	{return taggedDouble;}
             Bool_t          GetTaggedDouble(const Int_t index)  const	{return taggedDouble[index];}
             Int_t           GetNDouble()                        const	{return nDouble;}
@@ -59,6 +60,7 @@ public:
             Double_t        GetDoubleEnergy(const Int_t index)  const	{return doubleEnergy[index];}
             void            DecodeDoubles(const Double_t timingRes = 3.0, const Bool_t decodeChain = true);
             Bool_t          HasEnergy()                         const   {return hasEnergy;}
+            Bool_t          HasCalibration()                    const   {return hasCalibration;}
             void            SetCalibration(const Int_t nChan, const Double_t *energy);
     TLorentzVector          GetVector(const Int_t index)        const   {return TLorentzVector(0, 0, taggedEnergy[index], taggedEnergy[index]);}
     TLorentzVector          GetVectorProtonTarget(const Int_t index)    const;

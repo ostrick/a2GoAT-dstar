@@ -6,7 +6,8 @@ GTreeTagger::GTreeTagger(GTreeManager *Manager)    :
     nTagged(0),
     nDouble(0),
     nChain(0),
-    hasEnergy(0)
+    hasEnergy(0),
+    hasCalibration(0)
 {
     for(Int_t i=0; i<GTreeTagger_MAX; i++)
     {
@@ -183,6 +184,7 @@ void    GTreeTagger::DecodeDoubles(const Double_t timingRes, const Bool_t decode
 void    GTreeTagger::SetCalibration(const Int_t nChan, const Double_t *energy)
 {
     for(Int_t i=0; i<nChan; i++) calibration[i] = energy[i];
+    hasCalibration = true;
 }
 
 TLorentzVector  GTreeTagger::GetVectorProtonTarget(const Int_t index)    const

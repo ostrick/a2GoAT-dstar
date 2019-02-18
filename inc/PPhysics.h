@@ -134,6 +134,7 @@ public:
 
 	Bool_t InitBackgroundCuts();
 	Bool_t InitTargetMass();
+    Bool_t InitTaggerCalibration();
 	Bool_t InitTaggerChannelCuts();
 	Bool_t InitTaggerScalers();
     Bool_t InitLiveTimeScalers();
