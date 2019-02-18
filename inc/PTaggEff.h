@@ -7,6 +7,7 @@
 #include <string>
 
 #include "GTreeManager.h"
+#include "GTreePairSpec.h"
 #include "PPhysics.h"
 #include "TF1.h"
 #include "TGraph.h"
@@ -27,6 +28,12 @@ private:
     TH2*	TaggerHits;
     TH2*	TaggerScalers;
     TH2*	TaggerHitScal;
+    TH1*        SumOpenScal;
+    TH1*        SumGatedScal;
+    TH1*        SumGatedDlyScal;
+    TH2*        PairSpecOpen;
+    TH2*        PairSpecGated;
+    TH2*        PairSpecGatedDly;
     TH1*	LiveTimeScal;
     Bool_t  FreeScalers;
     Bool_t  HasAttenuation;

@@ -73,6 +73,9 @@ void	PTaggEff::ProcessEvent()
         TaggerHits = new TH2D("TaggerHits","Tagger Hits",GetScalers()->GetNEntries(),0,GetScalers()->GetNEntries(),nTaggerChannels,0,nTaggerChannels);
         TaggerScalers = new TH2D("TaggerScalers","Tagger Scalers",GetScalers()->GetNEntries(),0,GetScalers()->GetNEntries(),nTaggerChannels,0,nTaggerChannels);
         TaggerHitScal = new TH2D("TaggerHitScal","Tagger Hits/Scalers",GetScalers()->GetNEntries(),0,GetScalers()->GetNEntries(),nTaggerChannels,0,nTaggerChannels);
+	PairSpecOpen = new TH2D("PairSpecOpen", "Pair Spec Scaler Open", GetScalers()->GetNEntries(),0,GetScalers()->GetNEntries(),nTaggerChannels,0,nTaggerChannels);
+	PairSpecGated = new TH2D("PairSpecGated", "Pair Spec Scaler Gated", GetScalers()->GetNEntries(),0,GetScalers()->GetNEntries(),nTaggerChannels,0,nTaggerChannels);
+	PairSpecGatedDly = new TH2D("PairSpecGatedDly", "Pair Spec Scaler Gated Delayed", GetScalers()->GetNEntries(),0,GetScalers()->GetNEntries(),nTaggerChannels,0,nTaggerChannels);
     }
 
     if(GetDecodeDoubles()) GetTagger()->DecodeDoubles();
@@ -215,11 +218,19 @@ void	PTaggEff::ProcessScalerRead()
 
     GoosyNewFPDRecabled(TaggerCurScal);
 
+    // Get Pair Spect array
+    const Double_t* scalerOpen = GetPairspec() -> GetScalerOpen();
+    const Double_t* scalerGated = GetPairspec() -> GetScalerGated();
+    const Double_t* scalerGatedDly = GetPairspec() -> GetScalerGatedDly();
+
     for (Int_t i = 1; i<=nTaggerChannels; i++)
     {
         TaggerHits->SetBinContent(scalerRead,i,TaggerCurHits->GetBinContent(i));
         TaggerScalers->SetBinContent(scalerRead,i,TaggerCurScal->GetBinContent(i));
         TaggerHitScal->SetBinContent(scalerRead,i,(TaggerCurHits->GetBinContent(i)/TaggerCurScal->GetBinContent(i)));
+	PairSpecOpen->SetBinContent(scalerRead,i,scalerOpen[i-1]);
+	PairSpecGated->SetBinContent(scalerRead,i,scalerGated[i-1]);
+	PairSpecGatedDly->SetBinContent(scalerRead,i,scalerGatedDly[i-1]);
     }
 
     TaggerTime->ProjectionY("TaggerPreHits");
@@ -285,6 +296,18 @@ Bool_t	PTaggEff::Write()
     TaggerScalers->Write();
     TaggerHitScal->Write();
     TaggerTime->Write();
+
+    //Pair spec Sum scaler histos
+    SumOpenScal = PairSpecOpen -> ProjectionY("SumOpenScal",1, PairSpecOpen->GetNbinsX(),"e");
+    SumGatedScal = PairSpecGated -> ProjectionY("SumGatedScal",1, PairSpecGated->GetNbinsX(),"e");
+    SumGatedDlyScal = PairSpecGatedDly -> ProjectionY("SumGatedDlyScal",1, PairSpecGatedDly->GetNbinsX(),"e");
+
+    PairSpecOpen->Write();
+    PairSpecGated->Write();
+    PairSpecGatedDly->Write();
+    SumOpenScal->Write();
+    SumGatedScal->Write();
+    SumGatedDlyScal->Write();
 
     TH1D *TempAllHits = (TH1D*)TaggerAllHits->GetSum()->GetResult()->GetBuffer()->Clone("TempAllHits");
     TH1D *TempSingles = (TH1D*)TaggerSingles->GetSum()->GetResult()->GetBuffer()->Clone("TempSingles");

@@ -10,6 +10,7 @@
 #include "GTreeTrack.h"
 #include "GTreeTagger.h"
 #include "GTreeLinPol.h"
+#include "GTreePairSpec.h"
 #include "GTreeScaler.h"
 #include "GTreeParticle.h"
 #include "GTreeMeson.h"
@@ -53,6 +54,7 @@ private:
     GTreeTrack*         tracks;
     GTreeTagger*        tagger;
     GTreeLinPol*        linpol;
+    GTreePairSpec*      pairspec;
     GTreeTrigger*       trigger;
     GTreeScaler*        scalers;
 
@@ -81,6 +83,7 @@ protected:
     GTreeTrack*   GetTracks()                 {return tracks;}
     GTreeTagger*        GetTagger()                 {return tagger;}
     GTreeLinPol*        GetLinpol()                 {return linpol;}
+    GTreePairSpec*      GetPairspec()               {return pairspec;}
     GTreeTrigger*       GetTrigger()                {return trigger;}
     GTreeScaler*        GetScalers()                {return scalers;}
 
@@ -106,6 +109,7 @@ protected:
     const   GTreeTrack*   GetTracks()             const       {return tracks;}
     const   GTreeTagger*        GetTagger()             const       {return tagger;}
     const   GTreeLinPol*        GetLinpol()             const       {return linpol;}
+    const   GTreePairSpec*      GetPairspec()           const       {return pairspec;}
     const   GTreeTrigger*       GetTrigger()            const       {return trigger;}
     const   GTreeScaler*        GetScalers()            const       {return scalers;}
 

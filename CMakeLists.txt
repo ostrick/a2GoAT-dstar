@@ -54,6 +54,7 @@ set(GOAT_BASE
    inc/GTreeDetectorHits.h
    inc/GTreeTagger.h
    inc/GTreeLinPol.h
+   inc/GTreePairSpec.h
    inc/GTreeScaler.h
    inc/GTreeParticle.h
    inc/GTreeMeson.h
@@ -69,6 +70,7 @@ set(GOAT_BASE
    src/GTreeDetectorHits.cc
    src/GTreeTagger.cc
    src/GTreeLinPol.cc
+   src/GTreePairSpec.cc
    src/GTreeScaler.cc
    src/GTreeParticle.cc
    src/GTreeMeson.cc
