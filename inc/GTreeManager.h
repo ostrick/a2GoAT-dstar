@@ -31,7 +31,7 @@
 
 class  GTreeManager : public GHistManager, public GConfigFile
 {
-private:
+public:
     TFile*      inputFile;
     TObjArray   treeList;
     TObjArray   treeCorreleatedToScalerReadList;

@@ -119,6 +119,25 @@ public:
 	void FillBeamAsymmetry(const GTreeParticle& tree, Int_t particle_index, TH1* Hprompt, TH1* Hrandom, Double_t MM_min, Double_t MM_max);
 	void FillBeamAsymmetry(const GTreeParticle& tree, Int_t particle_index, Int_t tagger_index, TH1* Hprompt, TH1* Hrandom, Double_t MM_min, Double_t MM_max);
 
+    /// START d* FEDE ////
+    void    FillTime_track(Int_t particle_index,Int_t tagger_index, GH1* gHist);
+
+    void    Filltheta_track(Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning);
+    void    FillPSA_track(Int_t particle_index, Int_t tagger_index, GHistBGSub2* gHist);
+
+    void    FillTaggerChannel_track(Int_t particle_index,Int_t tagger_index, GH1* gHist);
+
+    void    Fillcoplanarity(Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning);
+
+
+    void    FilldE_E_CB_track(Int_t track_index, GHistBGSub2* gHist);
+    void    FilldE_E_CB_track(Int_t track_index, Int_t tagger_index, GHistBGSub2* gHist);
+
+    void    FilldE_E_TAPS_track(Int_t track_index, GHistBGSub2* gHist);
+    void    FilldE_E_TAPS_track(Int_t track_index, Int_t tagger_index, GHistBGSub2* gHist);
+
+    /// end d* FEDE ////
+
 	Double_t CalcCoplanarity(const GTreeParticle& tree1, Int_t particle_index1, const GTreeParticle& tree2, Int_t particle_index2);
 
     void AddScalerHist(const char* name, Int_t lo, Int_t hi);

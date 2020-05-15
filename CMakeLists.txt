@@ -163,6 +163,17 @@ add_executable(TaggEff
    )
 target_link_libraries(TaggEff goatbase ghist ${LIBS} ${ROOT_LIBRARIES})
 
+add_executable(prova_dstar
+    ${GOAT_BASE}
+    ${GOAT_GHIST}
+    inc/PPhysics.h
+    src/PPhysics.cc
+    inc/prova_dstar.h
+    src/prova_dstar.cc
+    src/prova_dstar_main.cc
+   )
+target_link_libraries(prova_dstar ${LIBS} ${ROOT_LIBRARIES})
+
 # install some scripts to the bin directory
 # by creating symlinks
 file(GLOB CORE_EXTRA_SCRIPTS "scripts/*")

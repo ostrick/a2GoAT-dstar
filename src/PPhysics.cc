@@ -764,4 +764,111 @@ void	PPhysics::ProcessScalerRead()
     }
 }
 
+
+/// FEDE //// FOR D* ANALYSIS ////////////
+void PPhysics::FillTime_track(Int_t particle_index,Int_t tagger_index, GH1* gHist)
+{
+
+    time = GetTagger()->GetTaggedTime(tagger_index) - GetTracks()->GetTime(particle_index);
+    //   cout << "check particle_index in filltime_track: " << particle_index << endl;
+    gHist->Fill(time);
+}
+
+void PPhysics::Filltheta_track(Int_t particle_index, Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning)
+{
+    // calc particle time diff
+    if(RejectTagged(tagger_index)) return;
+
+    Double_t time = GetTagger()->GetTaggedTime(tagger_index) - GetTracks()->GetTime(particle_index);
+    if(TaggerBinning)   gHist->Fill(GetTracks()->GetTheta(particle_index),time, GetTagger()->GetTaggedChannel(tagger_index));
+    else gHist->Fill(GetTracks()->GetTheta(particle_index), time);
+}
+
+
+void PPhysics::Fillcoplanarity(Int_t tagger_index, GH1* gHist, Bool_t TaggerBinning)
+{
+    Double_t phi1 = GetTracks()->GetPhi(0);
+    Double_t phi2 =  GetTracks()->GetPhi(1);
+    Double_t phidiff = TMath::Abs(phi1 - phi2);
+    Double_t time = GetTagger()->GetTaggedTime(tagger_index) - GetTracks()->GetTime(0);
+    if(TaggerBinning)   gHist->Fill(phidiff,time, GetTagger()->GetTaggedChannel(tagger_index));
+    else gHist->Fill(phidiff, time);
+}
+
+
+
+
+void PPhysics::FillPSA_track(Int_t particle_index, Int_t tagger_index, GHistBGSub2* gHist)
+{
+    double  cluster_energy;
+    double  short_energy;
+    double  phi_psa;
+    double  r_psa;
+
+    cluster_energy = GetTracks()->GetClusterEnergy(particle_index);
+    short_energy = GetTracks()->GetShortEnergy(particle_index);
+    phi_psa = (TMath::ATan(short_energy/cluster_energy)*TMath::RadToDeg());
+    r_psa = TMath::Sqrt(TMath::Power(short_energy,2)+TMath::Power(cluster_energy,2));
+
+    Double_t time = GetTagger()->GetTaggedTime(tagger_index) - GetTracks()->GetTime(particle_index);
+    gHist->Fill(phi_psa, r_psa, time);
+}
+
+void PPhysics::FilldE_E_CB_track(Int_t track_index, Int_t tagger_index, GHistBGSub2* gHist)
+{
+    double  cluster_energy;
+    double  veto_energy;
+
+        cluster_energy = GetTracks()->GetClusterEnergy(track_index);
+        veto_energy = GetTracks()->GetVetoEnergy(track_index);
+        if(cluster_energy>20 && veto_energy>0)
+        {
+            Double_t time = GetTagger()->GetTaggedTime(tagger_index) -  GetTracks()->GetTime(track_index);
+            gHist->Fill(cluster_energy, veto_energy, time);
+        }
+}
+
+void PPhysics::FilldE_E_TAPS_track(Int_t track_index, GHistBGSub2* gHist)
+{
+    double  cluster_energy;
+    double  veto_energy;
+    for (Int_t j = 0; j < GetTagger()->GetNTagged(); j++)
+    {
+        if(GetTracks()->HasTAPS(track_index))
+        {
+            cluster_energy = GetTracks()->GetClusterEnergy(track_index);
+            veto_energy = GetTracks()->GetVetoEnergy(track_index);
+            if(cluster_energy>20 && veto_energy>0)
+            {
+                Double_t time = GetTagger()->GetTaggedTime(j) - GetTracks()->GetTime(track_index);
+                gHist->Fill(cluster_energy, veto_energy, time);
+            }
+        }
+    }
+}
+
+void PPhysics::FilldE_E_TAPS_track(Int_t track_index, Int_t tagger_index, GHistBGSub2* gHist)
+{
+    double  cluster_energy;
+    double  veto_energy;
+    if(GetTracks()->HasTAPS(track_index))
+    {
+        cluster_energy = GetTracks()->GetClusterEnergy(track_index);
+        veto_energy = GetTracks()->GetVetoEnergy(track_index);
+        if(cluster_energy>20 && veto_energy>0)
+        {
+            Double_t time = GetTagger()->GetTaggedTime(tagger_index) - GetTracks()->GetTime(track_index);
+            gHist->Fill(cluster_energy, veto_energy, time);
+        }
+    }
+}
+
+void PPhysics::FillTaggerChannel_track(Int_t particle_index, Int_t j, GH1* gHist)
+{
+
+    Double_t time = GetTagger()->GetTaggedTime(j) - GetTracks()->GetTime(particle_index);
+    gHist->Fill(GetTagger()->GetTaggedChannel(j), time);
+}
+
+
 #endif
